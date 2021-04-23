@@ -10,7 +10,8 @@ face:{
 
 
 class Walker():
-	def __init__(self,name,maze):
+	def __init__(self,name,maze,pyGame):
+		self.surface = pyGame.surface
 		self.maze = maze
 		self.name = name
 		self.face = random.randint(0,4)

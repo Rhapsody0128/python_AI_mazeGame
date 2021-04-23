@@ -2,13 +2,16 @@
 import random
 
 from grid import Grid
+from pyGame import PyGame
+
 
 class Maze():
-	def __init__(self,size):
+	def __init__(self,size,pyGame):
+		self.surface = pyGame.surface
 		self.size = size
 		self.maze = []
-		self.start = [random.randint(0,size-2)+1,0]
-		self.goal = [random.randint(0,size-2)+1,self.size-1]
+		self.start = [random.randint(0,size-1),0]
+		self.goal = [random.randint(0,size-1),self.size-1]
 		self.createMaze(self.size)
 
 	def getGrid(self,position):
@@ -19,7 +22,7 @@ class Maze():
 		for i in range(size):
 			row = []
 			for j in range(size):
-				grid = Grid(size,j,i,index)
+				grid = Grid(size,j,i,index,self.surface)
 				if i == 0 :
 					grid.wall[0] = 2
 				if j == 0 :
@@ -39,6 +42,3 @@ class Maze():
 				TXT.write(str(mazeCol.wall))
 			TXT.write('\n')
 		TXT.close()
-
-z = Maze(4)
-z.drawMaze()
