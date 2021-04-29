@@ -2,18 +2,24 @@
 import random
 
 from grid import Grid
-from pyGame import PyGame
+import pygame as pg
+import tkinter as tk
 
 
 class Maze():
-	def __init__(self,size,pyGame):
-		self.surface = pyGame.surface
+	def __init__(self,size,screen):
+		self.screen = screen
 		self.size = size
 		self.maze = []
 		self.start = [random.randint(0,size-1),0]
 		self.goal = [random.randint(0,size-1),self.size-1]
+		self.gridGroup = pg.sprite.Group()
+
+		self.map = pg.Surface([tk.Tk().winfo_screenheight(),tk.Tk().winfo_screenheight()])
+		self.map.fill('white')
 		self.createMaze(self.size)
 
+		self.screen.blit(self.map,[int((tk.Tk().winfo_screenwidth()-tk.Tk().winfo_screenheight())/2),0])
 	def getGrid(self,position):
 		return self.maze[position[0]][position[1]]
 
@@ -22,7 +28,7 @@ class Maze():
 		for i in range(size):
 			row = []
 			for j in range(size):
-				grid = Grid(size,j,i,index,self.surface)
+				grid = Grid(size,j,i,index)
 				if i == 0 :
 					grid.wall[0] = 2
 				if j == 0 :
@@ -32,6 +38,8 @@ class Maze():
 				if j == size-1:
 					grid.wall[1] = 2
 				row.append(grid)
+				self.gridGroup.add(grid)
+				self.gridGroup.draw(self.map)
 				index += 1
 			self.maze.append(row)
 
