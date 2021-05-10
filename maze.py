@@ -14,12 +14,12 @@ class Maze():
 		self.start = [random.randint(0,size-1),0]
 		self.goal = [random.randint(0,size-1),self.size-1]
 		self.gridGroup = pg.sprite.Group()
-
-		self.map = pg.Surface([tk.Tk().winfo_screenheight(),tk.Tk().winfo_screenheight()])
+		self.map = pg.Surface((self.screen.get_size()[0],self.screen.get_size()[1]))
 		self.map.fill('white')
 		self.createMaze(self.size)
 
-		self.screen.blit(self.map,[int((tk.Tk().winfo_screenwidth()-tk.Tk().winfo_screenheight())/2),0])
+		# self.screen.blit(self.map,[int((tk.Tk().winfo_screenwidth()-tk.Tk().winfo_screenheight())/2),0])
+		self.screen.blit(self.map,[0,0])
 	def getGrid(self,position):
 		return self.maze[position[0]][position[1]]
 
@@ -28,7 +28,7 @@ class Maze():
 		for i in range(size):
 			row = []
 			for j in range(size):
-				grid = Grid(size,j,i,index)
+				grid = Grid(size,j,i,index,self.map)
 				if i == 0 :
 					grid.wall[0] = 2
 				if j == 0 :
@@ -38,6 +38,7 @@ class Maze():
 				if j == size-1:
 					grid.wall[1] = 2
 				row.append(grid)
+				grid.drawWall()
 				self.gridGroup.add(grid)
 				self.gridGroup.draw(self.map)
 				index += 1

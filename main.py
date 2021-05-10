@@ -16,12 +16,10 @@ class MazeGame():
 	def __init__(self):
 		pg.init()
 		
-		screen = pg.display.set_mode((tk.Tk().winfo_screenwidth(), tk.Tk().winfo_screenheight()	))
+		screen = pg.display.set_mode((800,800))
 		pg.display.set_caption("Maze Game")
 		screen.fill((0,0,0))
 
-		
-		print(tk.Tk().winfo_screenwidth())
 		maze = Maze(5,screen)
 		clock = pg.time.Clock()
 		# player = Drawer("Drawer",maze,pg)
