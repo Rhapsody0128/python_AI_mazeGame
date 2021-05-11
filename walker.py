@@ -1,7 +1,7 @@
 from maze import Maze
 import random
 
-face:{
+face={
 	0:'up',
 	1:'right',
 	2:"down",

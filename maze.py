@@ -17,6 +17,7 @@ class Maze():
 		self.map = pg.Surface((self.screen.get_size()[0],self.screen.get_size()[1]))
 		self.map.fill('white')
 		self.createMaze(self.size)
+		self.updateAllWall()
 
 		# self.screen.blit(self.map,[int((tk.Tk().winfo_screenwidth()-tk.Tk().winfo_screenheight())/2),0])
 		self.screen.blit(self.map,[0,0])
@@ -51,3 +52,8 @@ class Maze():
 				TXT.write(str(mazeCol.wall))
 			TXT.write('\n')
 		TXT.close()
+
+	def updateAllWall(self):
+		for mazeRow in self.maze:
+			for mazeCol in mazeRow:
+				mazeCol.drawWall()

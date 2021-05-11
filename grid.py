@@ -1,7 +1,7 @@
 import pygame as pg
 import random
 
-wall:{
+wall={
 	0:'empty',
 	1:'wall',
 	2:'outerWall',
@@ -18,7 +18,7 @@ class Grid(pg.sprite.Sprite):
 		self.position = [x,y]
 		self.visit = 0
 		self.gridSize = 50
-		self.wallSize = 4
+		self.wallSize = 1
 		self.color = 'gray'
 		self.drawGrid()
 		self.drawWall()
