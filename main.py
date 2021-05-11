@@ -20,13 +20,19 @@ class MazeGame():
 		pg.display.set_caption("Maze Game")
 		screen.fill((0,0,0))
 
-		maze = Maze(5,screen)
+		self.maze = Maze(3,screen)
 		clock = pg.time.Clock()
-		# player = Drawer("Drawer",maze,pg)
+		self.drawer = Drawer("Drawer",self.maze)
 
 		while True:
-			clock.tick(100)
+			clock.tick(2)
 			pg.display.update()
+			if self.drawer.judgeArrivedGoal() == False:
+				self.drawer.walk()
+				self.maze.updateAllWall()
+				if self.drawer.blocked > 6:
+					self.drawer.position = self.maze.start.position
+					
 			for event in pg.event.get():
 				if event.type == QUIT:
 					pg.quit()

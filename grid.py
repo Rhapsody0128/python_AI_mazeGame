@@ -7,7 +7,6 @@ wall={
 	2:'outerWall',
 	3:'door'
 }
-
 class Grid(pg.sprite.Sprite):
 	def __init__(self,size,x,y,index,map):
 		pg.sprite.Sprite.__init__(self)
@@ -30,6 +29,9 @@ class Grid(pg.sprite.Sprite):
 		self.rect.x = (self.position[0]) * (self.gridSize)
 		self.rect.y = (self.position[1]) * (self.gridSize)
 		pg.display.update()
+	
+	def printGridColor(self,color):
+		self.image.fill(color)
 
 	def drawWall(self):
 		for i in range(4) :
@@ -40,14 +42,15 @@ class Grid(pg.sprite.Sprite):
 		pg.display.update()
 	
 	def getWallDrawPosition(self,face):
+		length = self.gridSize-self.wallSize/2
 		if face == 0 :
-			return [(0,0),(self.gridSize-self.wallSize/2,0)]
+			return [(0,0),(0,length)]
 		if face == 1 :
-			return [(self.gridSize-self.wallSize/2,0),(self.gridSize-self.wallSize/2,self.gridSize-self.wallSize/2)]
+			return [(0,length),(length,length)]
 		if face == 2 :
-			return [(self.gridSize-self.wallSize/2,self.gridSize-self.wallSize/2),(0,self.gridSize-self.wallSize/2)]
+			return [(length,length),(length,0)]
 		if face == 3 :
-			return [(0,self.gridSize-self.wallSize/2),(0,0)]
+			return [(length,0),(0,0)]
 
 	def getWallColor(self,wall):
 			if wall == 0:
