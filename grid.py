@@ -56,7 +56,7 @@ class Grid(pg.sprite.Sprite):
 			if wall == 0:
 				return self.color
 			if wall == 1:
-				return 'red'
+				return 'black'
 			if wall == 2:
 				return 'blue'
 			if wall == 3:

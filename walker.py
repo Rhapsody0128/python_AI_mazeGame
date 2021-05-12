@@ -1,3 +1,4 @@
+from math import e
 from maze import Maze
 import random
 import pygame as pg
@@ -12,11 +13,13 @@ class Walker():
 	def __init__(self,name,maze):
 		self.maze = maze
 		self.name = name
-		self.face = random.randint(0,4)
+		self.face = random.randint(0,4)%4
 		self.step = 0
 		self.position = self.maze.start.position
 		self.blocked = 0
-
+		self.clockwise = False
+		self.node = RouteNode(None,self.position)
+		
 	def walk(self):
 		if self.judgeCanWalk():
 			nextPosition = self.getNextPosition()
@@ -50,24 +53,26 @@ class Walker():
 		return nextPosition
 
 	def turn(self):
-		random1 = random.random()
-		self.blocked += 1
-		if random1 > 0.5 :
+		if self.blocked == 0 :
+			if random.random()>0.5:
+				self.clockwise = True
+		if self.clockwise == True :
 			self.face += 1
 			self.face = self.face % 4
-			print('向右轉')
+			self.blocked += 1
+			print('順時轉')
 		else:
 			self.face -= 1
 			self.face = abs(self.face % 4)
-			print('向左轉')
+			self.blocked += 1
+			print('逆時轉')
 
 class Drawer(Walker):
 	def __init__(self,name,maze):
 		super().__init__(name,maze)
 		print('起始點'+str(self.position))
-
-	def judgeCanWalk(self):
-		if self.maze.getGrid(self.position).wall[self.face] == 1 and self.maze.getGrid(self.getNextPosition()).visit < 1:
+	def judgeCanWalk(self):		
+		if self.maze.getGrid(self.position).wall[self.face]!= 2 and self.maze.getGrid(self.getNextPosition()).visit < 1 :
 			print('現在方向'+str(self.face))
 			print('面對牆壁是'+str(self.maze.getGrid(self.position).wall[self.face]))
 			print('可以走')
@@ -79,22 +84,38 @@ class Drawer(Walker):
 			return False
 		
 	def walk(self):
-		print(self.judgeCanWalk())
 		if self.judgeCanWalk():
 			nextPosition = self.getNextPosition()
 			print(f"從{self.position}走到{nextPosition}")
+
+			newNode = RouteNode(self.node,nextPosition)
+			self.node = newNode
+
 			self.action()
 			self.position = self.getNextPosition()
 			self.step += 1
 			self.maze.getGrid(self.position).visit += 1
-			rand = random.random()
-			if self.judgeArrivedGoal():
-				self.end()
-			if rand>=0.7:
+			self.blocked = 0
+			
+			if random.random()>=4:
 				self.turn()
 				print(f"任性轉彎到{self.face}")
 		else:
 			self.turn()
+
+	def autoWalk(self):
+		self.walk()
+		if self.judgeArrivedGoal() :
+			self.backNode()
+			self.autoWalk()
+		elif self.blocked > 4 :
+			if self.node.lastNode == None :
+				self.end()
+			else:
+				self.backNode()
+				self.autoWalk()
+		else: 
+			self.autoWalk()
 
 	def action(self):
 		try:
@@ -111,7 +132,17 @@ class Drawer(Walker):
 		else:
 			return False
 
+	def backNode(self):
+		print('回上一格')
+		self.node = self.node.lastNode
+		self.position = self.node.position
+
 	def end(self):
-		self.drawer = Drawer("Drawer",self.maze)
+		print('結束')
 
 
+
+class RouteNode():
+	def __init__(self,lastNode,position):
+		self.lastNode = lastNode
+		self.position = position
