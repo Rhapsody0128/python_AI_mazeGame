@@ -17,11 +17,19 @@ class Maze():
 		self.map.fill('white')
 		self.createMaze(self.size)
 		
+		
 		self.start = self.getGrid([random.randint(0,size-1),0])
 		self.goal = self.getGrid([random.randint(0,size-1),self.size-1])
 
-		self.start.printGridColor('red')
-		self.goal.printGridColor('blue')
+		self.setStartAndGoal('red','blue')
+
+
+
+	def setStartAndGoal(self,startColor,goalColor):
+		self.start.color = startColor
+		self.goal.color = goalColor
+		self.start.printGridColor(startColor)
+		self.goal.printGridColor(goalColor)
 		
 	def getGrid(self,position):
 		return self.maze[position[0]][position[1]]
@@ -59,3 +67,5 @@ class Maze():
 				mazeCol.drawWall()
 		self.gridGroup.draw(self.map)
 		self.screen.blit(self.map,[0,0])
+
+

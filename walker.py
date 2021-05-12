@@ -19,18 +19,28 @@ class Walker():
 		self.blocked = 0
 		self.clockwise = False
 		self.node = RouteNode(None,self.position)
+		self.colorGrid(self.position,'green')
 		
 	def walk(self):
 		if self.judgeCanWalk():
 			nextPosition = self.getNextPosition()
 			print(f"從{self.position}走到{nextPosition}")
+
+			newNode = RouteNode(self.node,nextPosition)
+			self.node = newNode
 			self.action()
+			self.colorGrid(self.position,self.maze.getGrid(self.position).color)
 			self.position = self.getNextPosition()
+			self.colorGrid(self.position,'green')
 			self.step += 1
 			self.maze.getGrid(self.position).visit += 1
+			self.blocked = 0
+
 		else:
 			self.turn()
 
+	def colorGrid(self,position,color):
+		self.maze.getGrid(position).printGridColor(color)
 
 	def action(self):
 		print('走下一個')
@@ -97,7 +107,7 @@ class Drawer(Walker):
 			self.maze.getGrid(self.position).visit += 1
 			self.blocked = 0
 			
-			if random.random()>=4:
+			if random.random()>=0.5:
 				self.turn()
 				print(f"任性轉彎到{self.face}")
 		else:
