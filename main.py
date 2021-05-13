@@ -25,10 +25,14 @@ class MazeGame():
 		self.drawer = Drawer("Drawer",self.maze)
 		self.drawer.autoWalk()
 		self.walker = Walker("Player",self.maze)
+		self.walkerz = Walker("Player",self.maze)
+		self.walkerq = Walker("Player",self.maze)
 		while True:
 			clock.tick(30000)
 			pg.display.update()
 			self.walker.walk()
+			self.walkerq.walk()
+			self.walkerz.walk()
 			self.maze.updateAllWall()
 			for event in pg.event.get():
 				if event.type == QUIT:

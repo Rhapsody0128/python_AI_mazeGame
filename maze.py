@@ -17,13 +17,9 @@ class Maze():
 		self.map.fill('white')
 		self.createMaze(self.size)
 		
-		
 		self.start = self.getGrid([random.randint(0,size-1),0])
 		self.goal = self.getGrid([random.randint(0,size-1),self.size-1])
-
 		self.setStartAndGoal('red','blue')
-
-
 
 	def setStartAndGoal(self,startColor,goalColor):
 		self.start.color = startColor

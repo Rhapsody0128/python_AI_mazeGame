@@ -1,5 +1,7 @@
+from Qlearning import Qnode
 import pygame as pg
 import random
+
 
 wall={
 	0:'empty',
@@ -37,8 +39,6 @@ class Grid(pg.sprite.Sprite):
 		for i in range(4) :
 			wall = self.wall[i]
 			pg.draw.line(self.image,self.getWallColor(wall), self.getWallDrawPosition(i)[0], self.getWallDrawPosition(i)[1], self.wallSize)
-
-
 		pg.display.update()
 	
 	def getWallDrawPosition(self,face):

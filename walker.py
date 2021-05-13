@@ -2,6 +2,7 @@ from math import e
 from maze import Maze
 import random
 import pygame as pg
+from Qlearning import Qnode,Qtable
 
 face={
 	0:'up',
@@ -64,18 +65,42 @@ class Walker():
 
 	def turn(self):
 		if self.blocked == 0 :
-			if random.random()>0.5:
-				self.clockwise = True
-		if self.clockwise == True :
-			self.face += 1
-			self.face = self.face % 4
-			self.blocked += 1
-			print('順時轉')
+			if self.maze.getGrid(self.position).wall[(self.face+1)%4] == 0 and self.maze.getGrid(self.position).wall[abs((self.face-1) % 4)]==0:
+				if random.random() > 0.5 :
+					self.face += 1
+					self.face = self.face % 4
+					self.blocked += 1
+				else:
+					self.face -= 1
+					self.face = abs(self.face % 4)
+					self.blocked += 1
+			elif self.maze.getGrid(self.position).wall[(self.face+1)%4] == 0:
+				self.face += 1
+				self.face = self.face % 4
+				self.blocked += 1
+			elif self.maze.getGrid(self.position).wall[abs((self.face-1) % 4)] == 0:
+				self.face -= 1
+				self.face = abs(self.face % 4)
+				self.blocked += 1
+			else:
+				self.face += 2
+				self.face = self.face % 4
+
+	def judgeArrivedGoal(self):
+		if self.position == self.maze.goal.position:
+			print('到達終點')
+			return True
 		else:
-			self.face -= 1
-			self.face = abs(self.face % 4)
-			self.blocked += 1
-			print('逆時轉')
+			return False
+
+	def backNode(self):
+		print('回上一格')
+		self.node = self.node.lastNode
+		self.position = self.node.position
+
+	def end(self):
+		print('結束')
+
 
 class Drawer(Walker):
 	def __init__(self,name,maze):
@@ -135,20 +160,82 @@ class Drawer(Walker):
 		except:
 			print('撞牆')
 
-	def judgeArrivedGoal(self):
-		if self.position == self.maze.goal.position:
-			print('到達終點')
-			return True
+	def turn(self):
+		if self.blocked == 0 :
+			if random.random()>0.5:
+				self.clockwise = True
+		if self.clockwise == True :
+			self.face += 1
+			self.face = self.face % 4
+			self.blocked += 1
+			print('順時轉')
 		else:
+			self.face -= 1
+			self.face = abs(self.face % 4)
+			self.blocked += 1
+			print('逆時轉')
+
+
+class AIWalker(Walker):
+	def __init__(self,name,maze):
+		super().__init__(name,maze)
+		print('起始點'+str(self.position))
+		self.Qtable = Qtable(self.maze.size)
+
+	def judgeCanWalk(self):		
+		if self.maze.getGrid(self.position).wall[self.face]!= 0:
+			print('可以走')
+			return True
+		else :
+			print('不能走')
 			return False
+		
+	def walk(self):
+		self.turn()
+		if self.judgeCanWalk():
+			nextPosition = self.getNextPosition()
+			print(f"從{self.position}走到{nextPosition}")
 
-	def backNode(self):
-		print('回上一格')
-		self.node = self.node.lastNode
-		self.position = self.node.position
+			# newNode = RouteNode(self.node,nextPosition)
+			# self.node = newNode
 
-	def end(self):
-		print('結束')
+			self.action()
+			self.position = self.getNextPosition()
+			self.step += 1
+			self.maze.getGrid(self.position).visit += 1
+			self.blocked = 0
+		else:
+			self.turn()
+
+	def autoWalk(self):
+		self.walk()
+		if self.judgeArrivedGoal() :
+			self.backNode()
+			self.autoWalk()
+		elif self.blocked > 4 :
+			if self.node.lastNode == None :
+				self.end()
+			else:
+				self.backNode()
+				self.autoWalk()
+		else: 
+			self.autoWalk()
+
+	def action(self):
+		try:
+			print(self.getQnode().point)
+		except:
+			print('出錯')
+
+	def getQnode(self):
+		return self.Qtable.getQnode(self.position)
+
+	def bestDirection(self):
+		return self.getQnode().getBestWay
+
+	def turn(self):
+		self.face = self.bestDirection()
+
 
 
 
