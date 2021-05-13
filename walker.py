@@ -44,13 +44,18 @@ class Walker():
 		self.maze.getGrid(position).printGridColor(color)
 
 	def action(self):
-		print('走下一個')
+  		print('走下一個')
+			
+	def getGrid(self):
+		return self.maze.getGrid(self.position)
+
 
 	def judgeCanWalk(self):
 		if self.maze.getGrid(self.position).wall[self.face] == 0:
 			return True
 		else :
 			return False
+
 
 	def getNextPosition(self):
 		if self.face == 0:
@@ -94,7 +99,7 @@ class Walker():
 			return False
 
 	def backNode(self):
-		print('回上一格')
+		# print('回上一格')
 		self.node = self.node.lastNode
 		self.position = self.node.position
 
@@ -108,20 +113,20 @@ class Drawer(Walker):
 		print('起始點'+str(self.position))
 	def judgeCanWalk(self):		
 		if self.maze.getGrid(self.position).wall[self.face]!= 2 and self.maze.getGrid(self.getNextPosition()).visit < 1 :
-			print('現在方向'+str(self.face))
-			print('面對牆壁是'+str(self.maze.getGrid(self.position).wall[self.face]))
-			print('可以走')
+			# print('現在方向'+str(self.face))
+			# print('面對牆壁是'+str(self.maze.getGrid(self.position).wall[self.face]))
+			# print('可以走')
 			return True
 		else :
-			print('現在方向'+str(self.face))
-			print('面對牆壁是'+str(self.maze.getGrid(self.position).wall[self.face]))
-			print('不能走')
+			# print('現在方向'+str(self.face))
+			# print('面對牆壁是'+str(self.maze.getGrid(self.position).wall[self.face]))
+			# print('不能走')
 			return False
 		
 	def walk(self):
 		if self.judgeCanWalk():
 			nextPosition = self.getNextPosition()
-			print(f"從{self.position}走到{nextPosition}")
+			# print(f"從{self.position}走到{nextPosition}")
 
 			newNode = RouteNode(self.node,nextPosition)
 			self.node = newNode
@@ -134,7 +139,7 @@ class Drawer(Walker):
 			
 			if random.random()>=0.5:
 				self.turn()
-				print(f"任性轉彎到{self.face}")
+				# print(f"任性轉彎到{self.face}")
 		else:
 			self.turn()
 
@@ -156,7 +161,7 @@ class Drawer(Walker):
 		try:
 			self.maze.getGrid(self.position).wall[self.face] = 0
 			self.maze.getGrid(self.getNextPosition()).wall[(self.face+2)%4] = 0
-			print('打破牆壁')
+			# print('打破牆壁')
 		except:
 			print('撞牆')
 
@@ -168,12 +173,12 @@ class Drawer(Walker):
 			self.face += 1
 			self.face = self.face % 4
 			self.blocked += 1
-			print('順時轉')
+			# print('順時轉')
 		else:
 			self.face -= 1
 			self.face = abs(self.face % 4)
 			self.blocked += 1
-			print('逆時轉')
+			# print('逆時轉')
 
 
 class AIWalker(Walker):
@@ -182,8 +187,8 @@ class AIWalker(Walker):
 		print('起始點'+str(self.position))
 		self.Qtable = Qtable(self.maze.size)
 
-	def judgeCanWalk(self):		
-		if self.maze.getGrid(self.position).wall[self.face]!= 0:
+	def judgeCanWalk(self):
+		if self.maze.getGrid(self.position).wall[self.face] == 0 :
 			print('可以走')
 			return True
 		else :
@@ -191,50 +196,61 @@ class AIWalker(Walker):
 			return False
 		
 	def walk(self):
+		self.arrayDeadWay()
 		self.turn()
-		if self.judgeCanWalk():
+		if self.judgeCanWalk() and self.judgeArrivedGoal()==False:
+			
 			nextPosition = self.getNextPosition()
 			print(f"從{self.position}走到{nextPosition}")
-
+			print(self.getQnode().Qvalue)
 			# newNode = RouteNode(self.node,nextPosition)
 			# self.node = newNode
-
-			self.action()
+			# self.action()
+			self.colorGrid(self.position,self.maze.getGrid(self.position).color)
 			self.position = self.getNextPosition()
+			self.colorGrid(self.position,'green')
 			self.step += 1
 			self.maze.getGrid(self.position).visit += 1
 			self.blocked = 0
 		else:
 			self.turn()
 
-	def autoWalk(self):
-		self.walk()
-		if self.judgeArrivedGoal() :
-			self.backNode()
-			self.autoWalk()
-		elif self.blocked > 4 :
-			if self.node.lastNode == None :
-				self.end()
-			else:
-				self.backNode()
-				self.autoWalk()
-		else: 
-			self.autoWalk()
-
-	def action(self):
-		try:
-			print(self.getQnode().point)
-		except:
-			print('出錯')
+	# def action(self):
+	# 	try:
+	# 		print(self.getQnode().point)
+	# 	except:
+	# 		print('出錯')
 
 	def getQnode(self):
 		return self.Qtable.getQnode(self.position)
 
 	def bestDirection(self):
-		return self.getQnode().getBestWay
+		return self.getQnode().getBestWay()
 
+	def allExplored(self):
+		return self.getQnode().allExplored()
+
+	def getNotExplore(self):
+		return self.getQnode().getNotExplore()
+
+	def arrayDeadWay(self):
+		print('走到死路')
+		wallCount = 0
+		for wall in self.maze.getGrid(self.position).wall :
+			if wall == 1 and wall == 2:
+				wallCount +=1
+		if wallCount>2:
+			self.getQnode().Qvalue = -1
+  			
 	def turn(self):
-		self.face = self.bestDirection()
+		if self.allExplored() :
+			self.face = self.bestDirection()
+			print('此區探索完')
+			print('轉向'+str(self.face))
+		else:
+			self.face = self.getNotExplore()[random.randint(0,len(self.getNotExplore())-1)]
+			print('此區未探索完')
+			print('轉向'+str(self.face))
 
 
 

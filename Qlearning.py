@@ -2,20 +2,22 @@ class Qnode():
   def __init__(self,x,y):
     self.point = [0,0,0,0]
     self.position = [x,y]
-
+    self.Qvalue = 0
   def getBestWay(self):
     best = self.point[0]
     bestWay = 0
     for i in range(4):
-      if self.point[i] > best:
-        best = self.point[i]
-        bestWay = i
+      if self.point[i] != None:
+        if self.point[i] > best:
+          best = self.point[i]
+          bestWay = i
     return bestWay
 
   def getQvalue(self):
     value = 0
     for num in self.point:
       value += num
+    return self.Qvalue + value
 
   def allExplored(self):
     hasExplored = True
@@ -28,7 +30,7 @@ class Qnode():
     notExplore = []
     for i in range(4):
       if self.point[i] == 0:
-        notExplore.push(i)
+        notExplore.append(i)
     return notExplore
 
 
@@ -48,14 +50,14 @@ class Qtable ():
     for i in range(size):
       row = []
       for j in range(size):
-        qnode = Qnode(size,i,j)
+        qnode = Qnode(i,j)
         if i == 0 :
-          qnode.point[0] = 0
+          qnode.point[0] = None
         if j == 0 :
-          qnode.point[3] = 0
+          qnode.point[3] = None
         if i == size-1:
-          qnode.point[2] = 0
+          qnode.point[2] = None
         if j == size-1:
-          qnode.point[1] = 0
+          qnode.point[1] = None
         row.append(qnode)
       self.table.append(row)
