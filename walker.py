@@ -29,10 +29,13 @@ class Walker():
 
 			newNode = RouteNode(self.node,nextPosition)
 			self.node = newNode
+
 			self.action()
 			self.colorGrid(self.position,self.maze.getGrid(self.position).color)
+
 			self.position = self.getNextPosition()
 			self.colorGrid(self.position,'green')
+			
 			self.step += 1
 			self.maze.getGrid(self.position).visit += 1
 			self.blocked = 0
@@ -188,7 +191,7 @@ class AIWalker(Walker):
 		self.Qtable = Qtable(self.maze.size)
 
 	def judgeCanWalk(self):
-		if self.maze.getGrid(self.position).wall[self.face] == 0 :
+		if self.maze.getGrid(self.position).wall[self.face] == 0:
 			print('可以走')
 			return True
 		else :
@@ -196,68 +199,77 @@ class AIWalker(Walker):
 			return False
 		
 	def walk(self):
-		self.arrayDeadWay()
-		self.turn()
-		if self.judgeCanWalk() and self.judgeArrivedGoal()==False:
-			print(self.getQnode(self.position).Qvalue)
-			nextPosition = self.getNextPosition()
-			print(f"從{self.position}走到{nextPosition}")
-			print(self.getQnode(self.position).Qvalue)
-			# newNode = RouteNode(self.node,nextPosition)
-			# self.node = newNode
-			# self.action()
+			self.chooeseBestDirection()
+			if self.judgeCanWalk():
+				nextPosition = self.getNextPosition()
+				# print(f"從{self.position}走到{nextPosition}")
+				newNode = RouteNode(self.node,nextPosition)
+				self.node = newNode
 
-			self.colorGrid(self.position,self.maze.getGrid(self.position).color)
+				self.action()
+				self.colorGrid(self.position,self.maze.getGrid(self.position).color)
+				self.position = self.getNextPosition()
+				
+				self.colorGrid(self.position,'green')
+				self.step += 1
+				self.maze.getGrid(self.position).visit += 1
 
-			self.position = self.getNextPosition()
+				self.Qtable.getQnode(self.position).Qvalue[(self.face+2) % 4] -= (self.maze.getGrid(self.position).visit * 0.01)
 
-			self.colorGrid(self.position,'green')
-			self.step += 1
-			self.maze.getGrid(self.position).visit += 1
-			self.blocked = 0
-			
-			self.Qtable.record(self.getQnode(self.position),self.face,self.getQnode(nextPosition))
-			print(self.getQnode(self.position).getQvalue())
+				self.blocked = 0
+				if self.judgeArrivedGoal():
+					self.end()
+					self.Qtable.settle(10)
+				else:
+					if self.judgeWalkInDeadWay():
+						print('死路')
+						self.Qtable.settle(-1)
+			else:
+				self.Qtable.getQnode(self.position).Qvalue[self.face] = -1
+
+	def action(self):
+		try:
+			self.Qtable.record(self.getQnode(),self.face)
+		except:
+			print('出錯')
+
+	def judgeWalkInDeadWay(self):
+		wallCount = 0
+		for wall in self.maze.getGrid(self.position).wall:
+			if wall != 0 :
+				wallCount += 1
+		if wallCount>2:
+			return True
 		else:
-			self.turn()
+			return False
+			
+	def getQnode(self):
+		return self.Qtable.getQnode(self.position)
 
-	# def action(self):
-	# 	try:
-	# 		print(self.getQnode().point)
-	# 	except:
-	# 		print('出錯')
-
-	def getQnode(self,position):
-		return self.Qtable.getQnode(position)
-
-	def bestDirection(self):
-		return self.getQnode(self.position).getBestWay()
+	def chooeseBestDirection(self):
+		self.face = self.getQnode().getBestWay()
+		print('最好往'+str(self.face)+'走')
 
 	def allExplored(self):
-		return self.getQnode(self.position).allExplored()
+		return self.getQnode().allExplored()
 
 	def getNotExplore(self):
-		return self.getQnode(self.position).getNotExplore()
-
-	def arrayDeadWay(self):
-		print('走到死路')
-		wallCount = 0
-		for wall in self.maze.getGrid(self.position).wall :
-			if wall == 1 and wall == 2:
-				wallCount +=1
-		if wallCount>2:
-			self.getQnode(self.position).Qvalue = -100
+		return self.getQnode().getNotExplore()
   			
 	def turn(self):
-		if self.allExplored() :
-			self.face = self.bestDirection()
-			print('此區探索完')
-			print('轉向'+str(self.face))
+		if self.blocked == 0 :
+			if random.random()>0.5:
+				self.clockwise = True
+		if self.clockwise == True :
+			self.face += 1
+			self.face = self.face % 4
+			self.blocked += 1
+			print('順時轉')
 		else:
-			self.face = self.getNotExplore()[random.randint(0,len(self.getNotExplore())-1)]
-			print('此區未探索完')
-			print('轉向'+str(self.face))
-
+			self.face -= 1
+			self.face = abs(self.face % 4)
+			self.blocked += 1
+			print('逆時轉')
 
 
 

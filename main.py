@@ -6,12 +6,6 @@ from pygame.locals import QUIT
 import random
 import tkinter as tk
 
-
-
-
-
-
-
 class MazeGame():
 	def __init__(self):
 		pg.init()
