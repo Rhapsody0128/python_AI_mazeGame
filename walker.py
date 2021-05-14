@@ -110,7 +110,7 @@ class Walker():
 class Drawer(Walker):
 	def __init__(self,name,maze):
 		super().__init__(name,maze)
-		print('起始點'+str(self.position))
+		print('------------------------開始------------------------')
 	def judgeCanWalk(self):		
 		if self.maze.getGrid(self.position).wall[self.face]!= 2 and self.maze.getGrid(self.getNextPosition()).visit < 1 :
 			# print('現在方向'+str(self.face))
@@ -199,19 +199,25 @@ class AIWalker(Walker):
 		self.arrayDeadWay()
 		self.turn()
 		if self.judgeCanWalk() and self.judgeArrivedGoal()==False:
-			
+			print(self.getQnode(self.position).Qvalue)
 			nextPosition = self.getNextPosition()
 			print(f"從{self.position}走到{nextPosition}")
-			print(self.getQnode().Qvalue)
+			print(self.getQnode(self.position).Qvalue)
 			# newNode = RouteNode(self.node,nextPosition)
 			# self.node = newNode
 			# self.action()
+
 			self.colorGrid(self.position,self.maze.getGrid(self.position).color)
+
 			self.position = self.getNextPosition()
+
 			self.colorGrid(self.position,'green')
 			self.step += 1
 			self.maze.getGrid(self.position).visit += 1
 			self.blocked = 0
+			
+			self.Qtable.record(self.getQnode(self.position),self.face,self.getQnode(nextPosition))
+			print(self.getQnode(self.position).getQvalue())
 		else:
 			self.turn()
 
@@ -221,17 +227,17 @@ class AIWalker(Walker):
 	# 	except:
 	# 		print('出錯')
 
-	def getQnode(self):
-		return self.Qtable.getQnode(self.position)
+	def getQnode(self,position):
+		return self.Qtable.getQnode(position)
 
 	def bestDirection(self):
-		return self.getQnode().getBestWay()
+		return self.getQnode(self.position).getBestWay()
 
 	def allExplored(self):
-		return self.getQnode().allExplored()
+		return self.getQnode(self.position).allExplored()
 
 	def getNotExplore(self):
-		return self.getQnode().getNotExplore()
+		return self.getQnode(self.position).getNotExplore()
 
 	def arrayDeadWay(self):
 		print('走到死路')
@@ -240,7 +246,7 @@ class AIWalker(Walker):
 			if wall == 1 and wall == 2:
 				wallCount +=1
 		if wallCount>2:
-			self.getQnode().Qvalue = -1
+			self.getQnode(self.position).Qvalue = -100
   			
 	def turn(self):
 		if self.allExplored() :

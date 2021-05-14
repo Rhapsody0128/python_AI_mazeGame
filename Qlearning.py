@@ -16,7 +16,8 @@ class Qnode():
   def getQvalue(self):
     value = 0
     for num in self.point:
-      value += num
+      if num != None:
+        value += num
     return self.Qvalue + value
 
   def allExplored(self):
