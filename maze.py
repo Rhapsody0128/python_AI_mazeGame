@@ -30,6 +30,11 @@ class Maze():
 	def getGrid(self,position):
 		return self.maze[position[0]][position[1]]
 
+	def clearVisit(self):
+		for mazeRow in self.maze:
+			for mazeCol in mazeRow:
+				mazeCol.visit = 0
+
 	def createMaze(self,size):
 		index = 0
 		for i in range(size):

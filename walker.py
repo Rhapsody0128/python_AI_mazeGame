@@ -5,10 +5,10 @@ import pygame as pg
 from Qlearning import Qnode,Qtable
 
 face={
-	0:'up',
-	1:'right',
-	2:"down",
-	3:"left"
+	0:'上',
+	1:'右',
+	2:"下",
+	3:"左"
 }
 class Walker():
 	def __init__(self,name,maze):
@@ -96,7 +96,8 @@ class Walker():
 
 	def judgeArrivedGoal(self):
 		if self.position == self.maze.goal.position:
-			print('到達終點')
+			# print('到達終點')
+
 			return True
 		else:
 			return False
@@ -107,7 +108,7 @@ class Walker():
 		self.position = self.node.position
 
 	def end(self):
-		print('結束')
+		print('')
 
 
 class Drawer(Walker):
@@ -185,47 +186,55 @@ class Drawer(Walker):
 
 
 class AIWalker(Walker):
-	def __init__(self,name,maze):
+	def __init__(self,name,maze,qtable):
 		super().__init__(name,maze)
-		print('起始點'+str(self.position))
-		self.Qtable = Qtable(self.maze.size)
+		# print('起始點'+str(self.position))
+		self.blocked = 0
+		self.motion = 0
+
+		if qtable == None :
+			self.Qtable = Qtable(self.maze.size)
+		else:
+			self.Qtable = qtable
+			
 
 	def judgeCanWalk(self):
 		if self.maze.getGrid(self.position).wall[self.face] == 0:
-			print('可以走')
+			# print('可以走')
 			return True
 		else :
-			print('不能走')
+			# print('不能走')
+			self.Qtable.getQnode(self.position).Qvalue[self.face] = -10000
 			return False
 		
 	def walk(self):
-			self.chooeseBestDirection()
-			if self.judgeCanWalk():
-				nextPosition = self.getNextPosition()
-				# print(f"從{self.position}走到{nextPosition}")
-				newNode = RouteNode(self.node,nextPosition)
-				self.node = newNode
+			if self.judgeArrivedGoal() == False:
+				self.motion += 1
+				self.chooeseBestDirection()
+				if self.judgeCanWalk():
+					nextPosition = self.getNextPosition()
+					# print(f"從{self.position}走到{nextPosition}")
+					
+					self.action()
+					self.colorGrid(self.position,self.maze.getGrid(self.position).color)
+					self.Qtable.getQnode(self.position).Qvalue[self.face] -= (self.maze.getGrid(self.position).visit*0.4)
+					self.position = self.getNextPosition()
 
-				self.action()
-				self.colorGrid(self.position,self.maze.getGrid(self.position).color)
-				self.position = self.getNextPosition()
-				
-				self.colorGrid(self.position,'green')
-				self.step += 1
-				self.maze.getGrid(self.position).visit += 1
+					self.Qtable.getQnode(self.position).Qvalue[(self.face+2) % 4] -= (self.maze.getGrid(self.position).visit*0.7)
 
-				self.Qtable.getQnode(self.position).Qvalue[(self.face+2) % 4] -= (self.maze.getGrid(self.position).visit * 0.01)
+					self.colorGrid(self.position,'green')
+					self.step += 1
+					self.maze.getGrid(self.position).visit += 1
 
-				self.blocked = 0
-				if self.judgeArrivedGoal():
-					self.end()
-					self.Qtable.settle(10)
-				else:
-					if self.judgeWalkInDeadWay():
-						print('死路')
-						self.Qtable.settle(-1)
-			else:
-				self.Qtable.getQnode(self.position).Qvalue[self.face] = -1
+
+					self.blocked = 0
+					if self.judgeArrivedGoal():
+						self.Qtable.settle(100)
+						self.end()
+					else:
+						if self.judgeWalkInDeadWay():
+							# print('死路')
+							self.Qtable.settle(-5)
 
 	def action(self):
 		try:
@@ -238,7 +247,7 @@ class AIWalker(Walker):
 		for wall in self.maze.getGrid(self.position).wall:
 			if wall != 0 :
 				wallCount += 1
-		if wallCount>2:
+		if wallCount>2 :
 			return True
 		else:
 			return False
@@ -248,28 +257,12 @@ class AIWalker(Walker):
 
 	def chooeseBestDirection(self):
 		self.face = self.getQnode().getBestWay()
-		print('最好往'+str(self.face)+'走')
+		# print('最好往'+face[self.face]+'走')
 
-	def allExplored(self):
-		return self.getQnode().allExplored()
-
-	def getNotExplore(self):
-		return self.getQnode().getNotExplore()
-  			
-	def turn(self):
-		if self.blocked == 0 :
-			if random.random()>0.5:
-				self.clockwise = True
-		if self.clockwise == True :
-			self.face += 1
-			self.face = self.face % 4
-			self.blocked += 1
-			print('順時轉')
-		else:
-			self.face -= 1
-			self.face = abs(self.face % 4)
-			self.blocked += 1
-			print('逆時轉')
+	def end(self):
+		# print(self.Qtable.getQnode(self.maze.start.position).Qvalue)
+		# print(self.Qtable.getQnode(self.position).Qvalue)
+		print('')
 
 
 
